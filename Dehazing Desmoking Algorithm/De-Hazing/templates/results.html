@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dehazing Results</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f0f0;
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            color: #343a40;
+            text-align: center;
+        }
+
+        .btn-custom {
+            background-color: #6c757d;
+            color: #fff;
+            border-radius: 5px;
+            transition: background-color 0.3s, transform 0.3s;
+            padding: 10px 20px;
+        }
+
+        .btn-custom:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .result-item {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            transition: box-shadow 0.3s;
+            background-color: #f8f9fa;
+            width: 100%;
+            max-width: 450px;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .result-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-item .img-container {
+            width: 100%;
+            height: 300px;
+            /* Fixed height for uniformity */
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+        }
+
+        .result-item img {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .parameters-list {
+            text-align: left;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .parameters-title {
+            font-weight: bold;
+            color: #343a40;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .parameters-item {
+            background-color: #e9ecef;
+            border: none;
+        }
+
+        .upload-link {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .explanation-section {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .explanation-title {
+            font-weight: bold;
+            color: #343a40;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .explanation-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .explanation-item {
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .explanation-item strong {
+            color: #343a40;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Dehazing Results</h1>
+        <div class="row">
+            {% for detail in output_details %}
+            <div class="col-md-6 d-flex align-items-stretch">
+                <div class="result-item">
+                    <h2>{{ detail.description }}</h2>
+                    <div class="img-container">
+                        <img src="{{ url_for('static', filename='dehazed_images/' + detail.output_path) }}"
+                            alt="Dehazed Image">
+                    </div>
+                    <p class="parameters-title">Parameters:</p>
+                    <ul class="parameters-list list-group">
+                        <li class="list-group-item parameters-item"><strong>Airlight Estimation Window Size:</strong> {{
+                            detail.parameters.airlightEstimation_windowSze }}</li>
+                        <li class="list-group-item parameters-item"><strong>Boundary Constraint Window Size:</strong> {{
+                            detail.parameters.boundaryConstraint_windowSze }}</li>
+                        <li class="list-group-item parameters-item"><strong>C0:</strong> {{ detail.parameters.C0 }}</li>
+                        <li class="list-group-item parameters-item"><strong>C1:</strong> {{ detail.parameters.C1 }}</li>
+                        <li class="list-group-item parameters-item"><strong>Regularize Lambda:</strong> {{
+                            detail.parameters.regularize_lambda }}</li>
+                        <li class="list-group-item parameters-item"><strong>Sigma:</strong> {{ detail.parameters.sigma
+                            }}</li>
+                        <li class="list-group-item parameters-item"><strong>Delta:</strong> {{ detail.parameters.delta
+                            }}</li>
+                    </ul>
+                    {% if 'transmission_path' in detail %}
+                    <a href="{{ url_for('static', filename='dehazed_images/' + detail.transmission_path) }}" download
+                        class="btn btn-custom mt-3">Download Transmission Map</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="explanation-section">
+            <h2 class="explanation-title">Parameter Explanations</h2>
+            <ul class="explanation-list">
+                <li class="explanation-item"><strong>Airlight Estimation Window Size:</strong> The size of the window
+                    used to estimate the airlight in the image.</li>
+                <li class="explanation-item"><strong>Boundary Constraint Window Size:</strong> The size of the window
+                    used to apply boundary constraints in the dehazing process.</li>
+                <li class="explanation-item"><strong>C0:</strong> A constant parameter used in the dehazing process to
+                    adjust the airlight value.</li>
+                <li class="explanation-item"><strong>C1:</strong> A constant parameter used in the dehazing process to
+                    adjust the boundary constraints.</li>
+                <li class="explanation-item"><strong>Regularize Lambda:</strong> A regularization parameter used to
+                    balance the trade-off between data fidelity and smoothness in the dehazing process.</li>
+                <li class="explanation-item"><strong>Sigma:</strong> A parameter used to control the amount of noise in
+                    the image.</li>
+                <li class="explanation-item"><strong>Delta:</strong> A parameter used to adjust the transmission map
+                    during the dehazing process.</li>
+            </ul>
+        </div>
+        <div class="upload-link">
+            <a href="/" class="btn btn-custom">Upload Another Image</a>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>
